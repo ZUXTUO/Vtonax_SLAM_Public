@@ -2,6 +2,8 @@
 
 [中文](README.md) | [English](README_EN.md) | [日本語](README_JA.md)
 
+**📖 [View Complete Technical Documentation WIKI](WIKI_EN.md)**
+
 This project is a visual SLAM and basic AR demonstration application for Android. The system implements real-time sparse point cloud mapping, map persistence and relocalization, plane detection, and AR object display with OpenGL rendering on mobile devices.
 
 > Note: The system uses a modified ORB approach (which can be understood as "customized ORB"), but implementation details and project structure are not elaborated in this document.

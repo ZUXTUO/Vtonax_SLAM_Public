@@ -2,6 +2,8 @@
 
 [中文](README.md) | [English](README_EN.md) | [日本語](README_JA.md)
 
+**📖 [查看完整技术文档 WIKI](WIKI.md)**
+
 本项目是一个面向 Android 的视觉 SLAM 与基础 AR 演示应用。系统在移动端实现了实时稀疏点云建图、地图持久化与重定位、平面检测，以及 OpenGL 渲染的 AR 对象展示。
 
 > 说明：系统使用了经过改造的 ORB 思路（可理解为"魔改 ORB"），但实现细节与项目结构在本文暂时不作展开。
