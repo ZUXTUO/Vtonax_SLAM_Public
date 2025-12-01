@@ -25,10 +25,10 @@
 ### 效果展示
 
 #### SLAM 部分
-![SLAM效果图](assets/image_1_slam.jpg)
+![SLAM效果图](www/img/image_1_slam.jpg)
 
 #### YOLO 部分
-![YOLO效果图](assets/image_2_yolo.jpg)
+![YOLO效果图](www/img/image_2_yolo.jpg)
 
 ---
 

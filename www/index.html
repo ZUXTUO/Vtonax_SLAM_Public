@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>维点域 Vtonax | 空间计算的未来</title>
+    <meta name="description" content="维点域 Vtonax - 全球领先的手机本地单目SLAM 6DoF AR方案">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+        :root {
+            --brand-green: #00ff88;
+            --brand-blue: #00aaff;
+            --bg-black: #000000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-black);
+            color: #ffffff;
+            font-family: 'Noto Sans SC', sans-serif;
+            overflow-x: hidden;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+            height: 800vh;
+        }
+        body::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        #viewport {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100svh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .spatial-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            will-change: transform, opacity;
+            transform-style: preserve-3d;
+        }
+
+        .spatial-content {
+            position: relative;
+            z-index: 10;
+            pointer-events: auto;
+            transform: translateZ(0);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .font-tech {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .text-glow-green {
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 40px rgba(0,0,0,0.6);
+        }
+
+        .hud-border {
+            position: relative;
+        }
+        .hud-border::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px;
+            width: 20px; height: 20px;
+            border-top: 2px solid var(--brand-green);
+            border-left: 2px solid var(--brand-green);
+        }
+        .hud-border::after {
+            content: '';
+            position: absolute;
+            bottom: -1px; right: -1px;
+            width: 20px; height: 20px;
+            border-bottom: 2px solid var(--brand-green);
+            border-right: 2px solid var(--brand-green);
+        }
+
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            mix-blend-mode: difference;
+        }
+
+        .progress-container {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 150px;
+            width: 2px;
+            background: rgba(255,255,255,0.1);
+            z-index: 100;
+        }
+        .progress-bar {
+            width: 100%;
+            background: var(--brand-green);
+            height: 0%;
+            box-shadow: 0 0 10px var(--brand-green);
+        }
+
+        .grid-bg {
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.3;
+        }
+
+        /* Sci-Fi Modal Styles */
+        #biz-modal { z-index: 200; }
+        .clip-corners {
+            clip-path: polygon(20px 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%, 0 20px);
+        }
+        .glitch-text {
+            position: relative;
+        }
+        .glitch-text::before,
+        .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-black);
+        }
+        .glitch-text::before {
+            left: 2px;
+            text-shadow: -1px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px;
+            text-shadow: -1px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(35px, 9999px, 4px, 0); }
+            5% { clip: rect(72px, 9999px, 65px, 0); }
+            10% { clip: rect(33px, 9999px, 92px, 0); }
+            15% { clip: rect(5px, 9999px, 86px, 0); }
+            20% { clip: rect(14px, 9999px, 10px, 0); }
+            25% { clip: rect(27px, 9999px, 69px, 0); }
+            30% { clip: rect(50px, 9999px, 8px, 0); }
+            35% { clip: rect(10px, 9999px, 46px, 0); }
+            40% { clip: rect(93px, 9999px, 15px, 0); }
+            45% { clip: rect(53px, 9999px, 4px, 0); }
+            50% { clip: rect(70px, 9999px, 98px, 0); }
+            100% { clip: rect(0, 9999px, 0, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(15px, 9999px, 56px, 0); }
+            5% { clip: rect(29px, 9999px, 21px, 0); }
+            10% { clip: rect(96px, 9999px, 85px, 0); }
+            15% { clip: rect(42px, 9999px, 30px, 0); }
+            20% { clip: rect(65px, 9999px, 91px, 0); }
+            25% { clip: rect(8px, 9999px, 13px, 0); }
+            30% { clip: rect(38px, 9999px, 68px, 0); }
+            35% { clip: rect(85px, 9999px, 2px, 0); }
+            40% { clip: rect(54px, 9999px, 36px, 0); }
+            45% { clip: rect(11px, 9999px, 87px, 0); }
+            50% { clip: rect(25px, 9999px, 51px, 0); }
+            100% { clip: rect(0, 9999px, 0, 0); }
+        }
+        .scan-line {
+            animation: scan-move 3s linear infinite;
+        }
+        @keyframes scan-move {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport">
+        <div id="canvas-container"></div>
+
+        <div class="spatial-section" id="section-hero">
+            <div class="spatial-content text-center px-4">
+                <div class="w-full max-w-4xl">
+                    <div class="mb-4 inline-block px-4 py-1 border border-green-500/30 rounded-full bg-green-900/10 text-brand-green text-[10px] md:text-xs tracking-[0.3em] font-tech uppercase">
+                        Spatial Computing
+                    </div>
+                    <h1 class="text-6xl md:text-9xl font-black tracking-tighter mb-4 text-white mix-blend-overlay opacity-90">
+                        VTONAX
+                    </h1>
+                    <h2 class="text-3xl md:text-6xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-500 -mt-2 md:-mt-4 mb-8">
+                        维点域
+                    </h2>
+                    <p class="text-gray-400 font-light tracking-normal md:tracking-wide max-w-2xl md:max-w-3xl mx-auto px-6" style="font-size: clamp(0.78rem, 2.6vw, 1.6rem);">
+                        AR 锚定定位 · 6DoF 空间计算 · 毫秒级建图
+                    </p>
+                    <div class="mt-12 animate-bounce opacity-50">
+                        <svg class="w-6 h-6 mx-auto text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spatial-section" id="section-philosophy">
+            <div class="spatial-content px-6 md:px-12">
+                <div class="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-6xl w-full">
+                    <div class="w-full md:w-1/2 text-left">
+                        <h3 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                            空间<br><span class="text-glow-green text-[#00ff88]">计算</span>
+                        </h3>
+                        <p class="text-lg md:text-xl text-gray-300 leading-relaxed font-light">
+                            Vtonax 不仅是 AR 引擎，它是设备的第三只眼。
+                            通过单目摄像头，我们将物理世界实时解析为数学矩阵。
+                            <br><br>
+                            <span class="text-white font-medium border-l-2 border-[#00ff88] pl-4 block text-base md:text-lg">
+                                无需激光雷达，仅凭普通手机算力与图形学算法，洞见三维真谛。
+                            </span>
+                        </p>
+                    </div>
+                    <div class="w-full md:w-1/2">
+                        <div class="glass-panel p-6 md:p-8 rounded-2xl hud-border">
+                            <div class="flex justify-between items-end mb-4 border-b border-gray-700 pb-2">
+                                <span class="font-tech text-xs text-gray-500">MAPPING_ENGINE</span>
+                                <span class="font-tech text-lg md:text-xl text-[#00ff88]">ACTIVE</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4 text-center">
+                                <div class="bg-white/5 p-4 rounded">
+                                    <div class="text-2xl md:text-3xl font-bold text-white font-tech">15ms</div>
+                                    <div class="text-[10px] md:text-xs text-gray-400 mt-1 uppercase">Loop Time</div>
+                                </div>
+                                <div class="bg-white/5 p-4 rounded">
+                                    <div class="text-2xl md:text-3xl font-bold text-white font-tech">0.5°</div>
+                                    <div class="text-[10px] md:text-xs text-gray-400 mt-1 uppercase">Angular Error</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spatial-section" id="section-tech">
+            <div class="spatial-content px-4 md:px-8">
+                <div class="w-full max-w-7xl text-center">
+                    <div class="mb-12 md:mb-20 flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-white/10 pb-6">
+                        <div class="text-left">
+                            <span class="text-blue-400 font-tech text-xs tracking-[0.2em] uppercase mb-2 block">Core Architecture</span>
+                            <h3 class="text-3xl md:text-5xl font-bold text-white">
+                                自研 SLAM 引擎
+                                <span class="text-gray-500 mx-2 hidden md:inline">|</span>
+                                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400 block md:inline mt-2 md:mt-0">
+                                    领先的 VIO 方案
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="hidden md:block pb-2">
+                            <div class="flex items-center gap-2 text-right">
+                                 <div class="h-[1px] w-12 bg-blue-500/50"></div>
+                                 <span class="font-tech text-xs text-gray-500">VTONAX_SYS</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="tech-carousel" class="relative w-full glass-panel rounded-xl overflow-hidden border border-blue-500/40 md:border-none md:bg-transparent md:backdrop-blur-none md:overflow-visible">
+                        <div class="carousel-track flex w-full h-full transition-transform duration-500 ease-out md:grid md:grid-cols-3 md:gap-6 md:w-auto md:h-auto md:transform-none">
+                            <!-- Card 1 -->
+                            <div class="min-w-full p-6 md:p-8 md:min-w-0 md:bg-black/40 md:backdrop-blur-md md:border md:border-blue-500/30 md:rounded-xl md:hover:border-blue-400/60 md:hover:bg-blue-900/20 md:transition-all md:duration-300 group">
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                </div>
+                                <h4 class="text-lg md:text-xl font-bold mb-3 text-white group-hover:text-blue-300 transition-colors">地图持久化</h4>
+                                <p class="text-xs md:text-sm text-gray-400 leading-relaxed mb-4 md:min-h-[4rem]">
+                                    扫描一次，永久记忆。二进制序列化存储与跨会话重定位，回到同一空间，虚拟物体依旧在对应位置。
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">跨设备迁移</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">区域缓存</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">增量更新</span>
+                                </div>
+                            </div>
+
+                            <!-- Card 2 -->
+                            <div class="min-w-full p-6 md:p-8 md:min-w-0 md:bg-black/40 md:backdrop-blur-md md:border md:border-green-500/30 md:rounded-xl md:hover:border-green-400/60 md:hover:bg-green-900/20 md:transition-all md:duration-300 group">
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-500/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                                <h4 class="text-lg md:text-xl font-bold mb-3 text-white group-hover:text-green-300 transition-colors">VIO 融合稳定</h4>
+                                <p class="text-xs md:text-sm text-gray-400 leading-relaxed mb-4 md:min-h-[4rem]">
+                                    自研6dof定位算法，不纯依赖视频画面，即便遮住画面，也能保持定位。快速运动与遮挡下保持稳定。
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">遮挡鲁棒</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">低漂移</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">实时重定位</span>
+                                </div>
+                            </div>
+
+                            <!-- Card 3 -->
+                            <div class="min-w-full p-6 md:p-8 md:min-w-0 md:bg-black/40 md:backdrop-blur-md md:border md:border-purple-500/30 md:rounded-xl md:hover:border-purple-400/60 md:hover:bg-purple-900/20 md:transition-all md:duration-300 group">
+                                <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-purple-500/20 flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-5 h-5 md:w-6 md:h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                </div>
+                                <h4 class="text-lg md:text-xl font-bold mb-3 text-white group-hover:text-purple-300 transition-colors">极低资源占用</h4>
+                                <p class="text-xs md:text-sm text-gray-400 leading-relaxed mb-4 md:min-h-[4rem]">
+                                    ~8K 行精简代码，内存占用 &lt;250MB；在低端 Android 设备上也能流畅运行。
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">轻量计算</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">GPU 友好</span>
+                                    <span class="font-tech text-[10px] md:text-xs px-2 py-1 rounded bg-white/5 border border-white/10 text-gray-300">多机型兼容</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Mobile Controls -->
+                        <button type="button" class="carousel-prev absolute inset-y-0 left-0 w-10 md:hidden flex items-center justify-center bg-black/20 hover:bg-black/40 text-white z-10">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button type="button" class="carousel-next absolute inset-y-0 right-0 w-10 md:hidden flex items-center justify-center bg-black/20 hover:bg-black/40 text-white z-10">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="spatial-section" id="section-media">
+            <div class="spatial-content px-6 md:px-12">
+                <div class="w-full max-w-6xl">
+                    <div class="mb-10 md:mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-4 border-b border-white/10 pb-6">
+                        <div class="text-left">
+                            <span class="text-blue-400 font-tech text-xs tracking-[0.2em] uppercase mb-2 block">Media Showcase</span>
+                            <h3 class="text-3xl md:text-5xl font-bold text-white">
+                                媒体演示
+                                <span class="text-xs md:text-base font-normal text-gray-500 ml-4 align-bottom">
+                                    Real-time Footage
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="hidden md:block pb-2">
+                            <div class="flex items-center gap-2">
+                                 <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                                 <span class="font-tech text-xs text-gray-500">LIVE_FEED_ARCHIVE</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-10">
+                        <div class="w-full md:w-1/2">
+                            <div class="relative w-full aspect-video glass-panel rounded-lg overflow-hidden border border-blue-500/40">
+                                <div class="absolute inset-0 grid-bg"></div>
+                                <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=115456019005936&bvid=BV1ddy2BiEgW&cid=33491649347&p=1" scrolling="no" frameborder="0" allowfullscreen class="absolute inset-0 w-full h-full"></iframe>
+                                <div class="absolute top-2 left-2 font-tech text-[10px] md:text-xs text-blue-400">DEMO: SLAM + AI</div>
+                            </div>
+                        </div>
+                        <div class="w-full md:w-1/2">
+                            <div id="media-carousel" class="relative w-full aspect-video glass-panel rounded-lg overflow-hidden border border-green-500/30">
+                                <div class="absolute inset-0 grid-bg"></div>
+                                <div class="carousel-track flex w-full h-full transition-transform duration-500 ease-out">
+                                    <div class="relative min-w-full h-full">
+                                        <img src="img/image_1_slam.jpg" alt="SLAM 演示" class="w-full h-full object-cover">
+                                        <div class="absolute bottom-2 left-2 font-tech text-[10px] md:text-xs text-green-400 px-2 py-1 bg-black/40 rounded">SLAM 演示</div>
+                                    </div>
+                                    <div class="relative min-w-full h-full">
+                                        <img src="img/image_2_yolo.jpg" alt="YOLO 识别" class="w-full h-full object-cover">
+                                        <div class="absolute bottom-2 left-2 font-tech text-[10px] md:text-xs text-yellow-400 px-2 py-1 bg-black/40 rounded">YOLO 识别</div>
+                                    </div>
+                                    <div class="relative min-w-full h-full">
+                                        <img src="img/image_3_miniwin.jpg" alt="MiniWin 演示" class="w-full h-full object-cover">
+                                        <div class="absolute bottom-2 left-2 font-tech text-[10px] md:text-xs text-blue-400 px-2 py-1 bg-black/40 rounded">MiniWin 演示</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="carousel-prev absolute inset-y-0 left-0 w-10 md:w-12 flex items-center justify-center bg-black/20 hover:bg-black/40 text-white z-10">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <button type="button" class="carousel-next absolute inset-y-0 right-0 w-10 md:w-12 flex items-center justify-center bg-black/20 hover:bg-black/40 text-white z-10">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spatial-section" id="section-ai">
+            <div class="spatial-content px-6 md:px-12">
+                <div class="flex flex-col md:flex-row-reverse items-center justify-between w-full max-w-6xl gap-10">
+                    <div class="w-full md:w-1/2 text-left md:text-right">
+                        <div class="inline-block bg-yellow-500/20 text-yellow-400 px-2 py-1 text-[10px] md:text-xs font-bold mb-4 font-tech">YOLO v5 + NCNN</div>
+                        <h3 class="text-4xl md:text-6xl font-bold mb-6">语境感知</h3>
+                        <p class="text-gray-300 text-lg md:text-lg mb-8">
+                            不仅知道位置，更理解内容。<br>
+                            集成轻量级神经网络，实时识别 80+ 种物体。
+                            <br><br>
+                            <span class="text-sm text-gray-500">行人 · 车辆 · 电子设备 · 家具</span>
+                        </p>
+                    </div>
+                    <div class="w-full md:w-1/2 relative">
+                        <div class="relative w-full aspect-video glass-panel rounded-lg overflow-hidden border border-yellow-500/30">
+                            <div class="absolute inset-0 grid-bg"></div>
+                            <div class="absolute top-1/4 left-1/4 w-24 h-24 md:w-32 md:h-32 border-2 border-yellow-500 rounded-sm flex flex-col justify-between p-1">
+                                <span class="bg-yellow-500 text-black text-[10px] font-bold px-1 w-max">Laptop 0.98</span>
+                            </div>
+                             <div class="absolute bottom-1/3 right-1/3 w-16 h-28 md:w-24 md:h-40 border-2 border-yellow-500 rounded-sm flex flex-col justify-between p-1 opacity-60">
+                                <span class="bg-yellow-500 text-black text-[10px] font-bold px-1 w-max">Cup 0.85</span>
+                            </div>
+                            <div class="absolute bottom-2 left-2 font-tech text-[10px] md:text-xs text-yellow-500">INFERENCE: 12ms</div>
+                            <div class="absolute top-2 right-2 font-tech text-[10px] md:text-xs text-green-500">VULKAN: ON</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spatial-section" id="section-footer">
+            <div class="spatial-content px-4">
+                <div class="text-center w-full">
+                    <h2 class="text-5xl md:text-8xl font-black mb-2 text-white opacity-20 select-none">VTONAX</h2>
+                    <h3 class="text-2xl md:text-4xl font-bold mb-8">开启 维点域</h3>
+                    <div class="flex flex-col md:flex-row gap-4 md:gap-6 justify-center items-center">
+                        <a href="https://github.com/ZUXTUO/Vtonax_SLAM_Public" id="footer-github" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform flex justify-center items-center shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                        <a href="#" id="biz-open" class="w-full md:w-auto border border-gray-500 px-8 py-4 rounded-full font-bold hover:bg-white hover:text-black transition-all flex justify-center">
+                            商务合作
+                        </a>
+                    </div>
+                    <div class="mt-16 text-[10px] md:text-xs text-gray-600 font-tech">
+                        © 2025 Olsc 版权所有
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="text-lg md:text-xl font-bold tracking-widest font-tech">VTONAX</div>
+        <div class="hidden md:block text-xs font-mono text-gray-400">SCROLL TO EXPLORE</div>
+        <a href="#section-footer" id="nav-contact" class="text-[10px] md:text-xs font-bold uppercase tracking-wider px-4 py-2 border border-white rounded-full hover:bg-white hover:text-black transition-colors">联系</a>
+    </nav>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+
+    <!-- Sci-Fi Modal -->
+    <div id="biz-modal" class="fixed inset-0 flex items-center justify-center pointer-events-none z-[200]">
+        <div class="modal-backdrop absolute inset-0 bg-black/90 backdrop-blur-xl opacity-0"></div>
+        
+        <div class="modal-content relative z-10 w-full max-w-md p-1 opacity-0 scale-90">
+            <!-- Decorative Borders/Corners -->
+            <div class="absolute inset-0 border border-blue-500/30 bg-blue-900/10 clip-corners pointer-events-none"></div>
+            <div class="absolute -inset-1 border border-cyan-400/20 blur-sm clip-corners pointer-events-none"></div>
+            
+            <!-- Corner accents -->
+            <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400 pointer-events-none modal-corner"></div>
+            <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400 pointer-events-none modal-corner"></div>
+            <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-cyan-400 pointer-events-none modal-corner"></div>
+            <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-cyan-400 pointer-events-none modal-corner"></div>
+
+            <!-- Scanning Line -->
+            <div class="scan-line absolute inset-x-0 h-[2px] bg-cyan-400/50 shadow-[0_0_10px_#00aaff] z-20 pointer-events-none"></div>
+
+            <!-- Content Inner -->
+            <div class="relative bg-black/80 backdrop-blur-md p-8 md:p-10 overflow-hidden clip-corners modal-inner">
+                <div class="absolute inset-0 grid-bg opacity-20 pointer-events-none"></div>
+                
+                <div class="relative z-10 text-center mb-8 modal-text-group">
+                    <div class="inline-block border border-cyan-500/50 px-3 py-1 rounded-sm bg-cyan-900/20 mb-4">
+                        <span class="font-tech text-[10px] md:text-xs text-cyan-300 tracking-[0.2em] animate-pulse">SYSTEM NOTICE</span>
+                    </div>
+                    <h3 class="text-3xl md:text-4xl font-bold text-white font-tech tracking-wider glitch-text mb-2" data-text="商务合作">商务合作</h3>
+                    <div class="h-[1px] w-24 mx-auto mt-4 bg-gradient-to-r from-transparent via-cyan-500 to-transparent"></div>
+                </div>
+
+                <div class="relative z-10 text-center mb-8 modal-text-group">
+                    <p class="text-sm text-gray-400 mb-2 font-tech tracking-widest uppercase">VTONAX Partnership</p>
+                    <p class="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-green-400 font-tech">
+                        功能部署中...
+                    </p>
+                    <p class="text-[10px] text-gray-500 mt-2 font-mono">ESTIMATED ARRIVAL: TBD</p>
+                </div>
+
+                <div class="relative z-10 modal-action">
+                    <button id="close-modal" class="group relative w-full py-3 overflow-hidden border border-cyan-500/50 bg-cyan-900/10 hover:bg-cyan-500/20 transition-all duration-300 cursor-pointer">
+                        <div class="absolute inset-0 w-1 bg-cyan-500 group-hover:w-full transition-all duration-300 opacity-10"></div>
+                        <span class="relative font-tech text-cyan-300 tracking-widest text-xs md:text-sm group-hover:text-white transition-colors">ACKNOWLEDGE / CLOSE</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x000000, 0.0015);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 8000);
+        camera.position.z = 0;
+
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        const starsGeometry = new THREE.BufferGeometry();
+        const starsCount = 2000;
+        const starsPos = new Float32Array(starsCount * 3);
+        
+        for(let i=0; i<starsCount*3; i+=3) {
+            starsPos[i] = (Math.random() - 0.5) * 400;
+            starsPos[i+1] = (Math.random() - 0.5) * 400;
+            starsPos[i+2] = (Math.random() * 8000) - 500;
+        }
+        starsGeometry.setAttribute('position', new THREE.BufferAttribute(starsPos, 3));
+        const starsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.4
+        });
+        const starsMesh = new THREE.Points(starsGeometry, starsMaterial);
+        scene.add(starsMesh);
+
+        const tunnelGeometry = new THREE.BufferGeometry();
+        const tunnelCount = 4000;
+        const tunnelPos = new Float32Array(tunnelCount * 3);
+        const tunnelColors = new Float32Array(tunnelCount * 3);
+        const colorPalette = [new THREE.Color('#00ff88'), new THREE.Color('#00aaff')];
+
+        for(let i=0; i<tunnelCount*3; i+=3) {
+            const theta = Math.random() * Math.PI * 2;
+            const radius = 20 + Math.random() * 50; 
+            
+            tunnelPos[i] = Math.cos(theta) * radius; 
+            tunnelPos[i+1] = Math.sin(theta) * radius; 
+            tunnelPos[i+2] = Math.random() * 8000; 
+
+            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+            tunnelColors[i] = color.r;
+            tunnelColors[i+1] = color.g;
+            tunnelColors[i+2] = color.b;
+        }
+        tunnelGeometry.setAttribute('position', new THREE.BufferAttribute(tunnelPos, 3));
+        tunnelGeometry.setAttribute('color', new THREE.BufferAttribute(tunnelColors, 3));
+        
+        const tunnelMaterial = new THREE.PointsMaterial({
+            size: 0.8,
+            vertexColors: true,
+            transparent: true,
+            opacity: 0.8,
+            blending: THREE.AdditiveBlending,
+            sizeAttenuation: true
+        });
+        const tunnelMesh = new THREE.Points(tunnelGeometry, tunnelMaterial);
+        scene.add(tunnelMesh);
+
+        let targetCameraZ = 0;
+        let mouseX = 0, mouseY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.05;
+        });
+        window.addEventListener('touchmove', (e) => {
+            const t = e.touches[0];
+            if (!t) return;
+            mouseX = (t.clientX - window.innerWidth / 2) * 0.05;
+            mouseY = (t.clientY - window.innerHeight / 2) * 0.05;
+        }, { passive: true });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            const time = clock.getElapsedTime();
+
+            tunnelMesh.rotation.z = time * 0.02;
+            starsMesh.rotation.z = time * 0.005;
+
+            tunnelMesh.position.x += (mouseX * -0.1 - tunnelMesh.position.x) * 0.05;
+            tunnelMesh.position.y += (mouseY * 0.1 - tunnelMesh.position.y) * 0.05;
+
+            camera.position.z += (targetCameraZ - camera.position.z) * 0.1;
+
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        gsap.registerPlugin(ScrollTrigger);
+
+        const sections = [
+            { id: "#section-hero", z: 0 },
+            { id: "#section-philosophy", z: 1500 },
+            { id: "#section-tech", z: 3000 },
+            { id: "#section-media", z: 4500 },
+            { id: "#section-ai", z: 6000 },
+            { id: "#section-footer", z: 7500 }
+        ];
+
+        const totalDepth = 8000; 
+
+        function applyProgress(progress) {
+            targetCameraZ = progress * totalDepth;
+            document.getElementById('progress-bar').style.height = (progress * 100) + "%";
+
+            sections.forEach((sec) => {
+                const el = document.querySelector(sec.id);
+                if (!el) return;
+                const content = el.querySelector('.spatial-content');
+                const distance = sec.z - targetCameraZ;
+
+                let opacity = 0;
+                let scale = 1;
+                let blur = 0;
+                let pointerEvents = "none";
+
+                if (distance > 500 && distance < 1500) {
+                    opacity = gsap.utils.mapRange(1500, 500, 0, 1, distance);
+                    scale = gsap.utils.mapRange(1500, 500, 0.5, 1, distance);
+                    blur = gsap.utils.mapRange(1500, 500, 10, 0, distance);
+                } else if (distance <= 500 && distance > -300) {
+                    opacity = 1;
+                    scale = gsap.utils.mapRange(500, -300, 1, 1.2, distance);
+                    blur = 0;
+                    pointerEvents = "auto";
+                } else if (distance <= -300) {
+                    opacity = gsap.utils.mapRange(-300, -800, 1, 0, distance);
+                    scale = gsap.utils.mapRange(-300, -800, 1.2, 3, distance);
+                    blur = gsap.utils.mapRange(-300, -800, 0, 20, distance);
+                }
+                
+                // Strict check: Only enable pointer events if this section is the primary focus
+                // This prevents overlapping sections from blocking clicks during transitions
+                if (opacity > 0.5 && distance > -400 && distance < 600) {
+                    pointerEvents = "auto";
+                } else {
+                    pointerEvents = "none";
+                }
+
+                gsap.set(el, {
+                    opacity: opacity,
+                    pointerEvents: pointerEvents,
+                    filter: `blur(${blur}px)`,
+                    zIndex: pointerEvents === "auto" ? 50 : 10 // Elevate active section
+                });
+                if (content) {
+                    gsap.set(content, {
+                        scale: scale,
+                        rotationX: mouseY * -0.5,
+                        rotationY: mouseX * 0.5
+                    });
+                }
+            });
+        }
+
+        ScrollTrigger.create({
+            trigger: "body",
+            start: "top top",
+            end: "bottom bottom",
+            scrub: 1,
+            onUpdate: (self) => {
+                applyProgress(self.progress);
+            }
+        });
+
+        applyProgress(0);
+
+        function initCarousel(selector, { auto = false, interval = 5000, mobileOnly = false } = {}) {
+            const container = typeof selector === 'string' ? document.querySelector(selector) : selector;
+            if (!container) return;
+            const track = container.querySelector('.carousel-track');
+            const slides = track ? Array.from(track.children) : [];
+            const prevBtn = container.querySelector('.carousel-prev') || document.getElementById('carousel-prev');
+            const nextBtn = container.querySelector('.carousel-next') || document.getElementById('carousel-next');
+            let index = 0;
+            let isActive = true;
+
+            let dotsWrap = document.createElement('div');
+            dotsWrap.className = 'absolute bottom-2 right-2 flex gap-1 z-20';
+            // Optional: hide dots on desktop if mobileOnly via CSS, but we handle logic here too
+            if (mobileOnly) dotsWrap.classList.add('md:hidden');
+            
+            for (let i = 0; i < slides.length; i++) {
+                const dot = document.createElement('button');
+                dot.type = 'button';
+                dot.className = 'w-2 h-2 md:w-2.5 md:h-2.5 rounded-full bg-white/30 transition-colors';
+                dot.addEventListener('click', (e) => { 
+                    if (!isActive) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    index = i; 
+                    update(); 
+                });
+                dotsWrap.appendChild(dot);
+            }
+            container.appendChild(dotsWrap);
+
+            function checkResponsive() {
+                if (mobileOnly && window.innerWidth >= 768) {
+                    if (isActive) {
+                        isActive = false;
+                        track.style.transform = '';
+                        track.style.transition = 'none';
+                        // Reset slides if needed, but grid handles layout
+                    }
+                } else {
+                    if (!isActive) {
+                        isActive = true;
+                        update();
+                    }
+                }
+            }
+
+            function update() {
+                if (!isActive || !track) return;
+                track.style.transition = 'transform 500ms ease-out';
+                track.style.transform = `translateX(-${index * 100}%)`;
+                dotsWrap.childNodes.forEach((d, i) => {
+                    d.className = 'w-2 h-2 md:w-2.5 md:h-2.5 rounded-full transition-colors ' + (i === index ? 'bg-white' : 'bg-white/30');
+                });
+            }
+            function nextSlide() { if (!isActive) return; index = (index + 1) % slides.length; update(); }
+            function prevSlide() { if (!isActive) return; index = (index - 1 + slides.length) % slides.length; update(); }
+
+            const handleBtn = (btn, action) => {
+                if (btn) {
+                    if (mobileOnly) btn.classList.add('md:hidden');
+                    btn.addEventListener('click', (e) => {
+                        if (!isActive) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        action();
+                        stopAuto();
+                        startAuto();
+                    });
+                }
+            };
+            handleBtn(nextBtn, nextSlide);
+            handleBtn(prevBtn, prevSlide);
+
+            container.setAttribute('tabindex', '0');
+            container.addEventListener('keydown', (e) => {
+                if (!isActive) return;
+                if (e.key === 'ArrowRight') { nextSlide(); stopAuto(); startAuto(); }
+                else if (e.key === 'ArrowLeft') { prevSlide(); stopAuto(); startAuto(); }
+            });
+
+            // Drag/Swipe Logic
+            let startX = 0;
+            let isDown = false;
+
+            const onStart = (x) => {
+                if (!isActive) return;
+                startX = x;
+                isDown = true;
+                stopAuto();
+                track.style.transition = 'none';
+            };
+            
+            const onMove = (x) => {
+                if (!isActive || !isDown) return;
+                const deltaX = x - startX;
+                const currentTranslate = -index * 100;
+                const movePercent = (deltaX / container.offsetWidth) * 100;
+                track.style.transform = `translateX(${currentTranslate + movePercent}%)`;
+            };
+
+            const onEnd = (x) => {
+                if (!isActive || !isDown) return;
+                isDown = false;
+                track.style.transition = 'transform 500ms ease-out';
+                const deltaX = x - startX;
+                if (Math.abs(deltaX) > 50) {
+                    if (deltaX < 0) nextSlide(); else prevSlide();
+                } else {
+                    update();
+                }
+                startAuto();
+            };
+
+            container.addEventListener('touchstart', (e) => onStart(e.touches[0].clientX), { passive: true });
+            container.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX), { passive: true });
+            container.addEventListener('touchend', (e) => onEnd(e.changedTouches[0].clientX));
+
+            container.addEventListener('mousedown', (e) => { if(isActive) { e.preventDefault(); onStart(e.clientX); } });
+            container.addEventListener('mousemove', (e) => { if(isActive) { e.preventDefault(); onMove(e.clientX); } });
+            container.addEventListener('mouseup', (e) => { if(isActive) onEnd(e.clientX); });
+            container.addEventListener('mouseleave', (e) => { if(isActive && isDown) onEnd(e.clientX); });
+
+            let timer = null;
+            function startAuto() { if (!auto || !isActive) return; stopAuto(); timer = setInterval(nextSlide, interval); }
+            function stopAuto() { if (timer) clearInterval(timer); timer = null; }
+            
+            container.addEventListener('mouseenter', stopAuto);
+            container.addEventListener('mouseleave', startAuto);
+            container.addEventListener('focusin', stopAuto);
+            container.addEventListener('focusout', startAuto);
+
+            if (mobileOnly) {
+                window.addEventListener('resize', checkResponsive);
+                checkResponsive();
+            } else {
+                update();
+                startAuto();
+            }
+        }
+
+        initCarousel('#media-carousel', { auto: false });
+        initCarousel('#tech-carousel', { auto: true, interval: 3000, mobileOnly: true });
+
+        function animateScrollTo(top, duration) {
+            const start = Math.max(window.pageYOffset, document.documentElement.scrollTop || 0);
+            const change = top - start;
+            const startTime = performance.now();
+            const d = Math.max(100, Math.min(600, duration || 300));
+            const ease = (t) => 1 - Math.pow(1 - t, 3);
+            function step(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(1, elapsed / d);
+                const val = start + change * ease(progress);
+                window.scrollTo(0, val);
+                if (progress < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        const navContact = document.getElementById('nav-contact');
+        if (navContact) {
+            navContact.addEventListener('click', (e) => {
+                e.preventDefault();
+                const footerSec = sections.find(s => s.id === "#section-footer");
+                const targetProgress = footerSec ? (footerSec.z / totalDepth) : 1;
+                const maxScroll = Math.max(0, document.body.scrollHeight - window.innerHeight);
+                const targetTop = Math.min(maxScroll, targetProgress * maxScroll);
+                animateScrollTo(targetTop, 280);
+            });
+        }
+
+        const bizOpen = document.getElementById('biz-open');
+        const bizModal = document.getElementById('biz-modal');
+        const bizBackdrop = bizModal ? bizModal.querySelector('.modal-backdrop') : null;
+        const bizContent = bizModal ? bizModal.querySelector('.modal-content') : null;
+        const bizInner = bizModal ? bizModal.querySelector('.modal-inner') : null;
+        const bizCorners = bizModal ? bizModal.querySelectorAll('.modal-corner') : [];
+        const bizTexts = bizModal ? bizModal.querySelectorAll('.modal-text-group') : [];
+        const bizAction = bizModal ? bizModal.querySelector('.modal-action') : null;
+        const bizClose = document.getElementById('close-modal');
+
+        function openBizModal() {
+            if (!bizModal || !bizContent) return;
+            gsap.set(bizModal, { pointerEvents: 'auto' });
+            
+            const tl = gsap.timeline();
+            tl.to(bizBackdrop, { opacity: 1, duration: 0.3 })
+              .fromTo(bizContent, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.4, ease: 'power3.out' }, '-=0.1')
+              .fromTo(bizInner, { scaleX: 0.8, opacity: 0 }, { scaleX: 1, opacity: 1, duration: 0.3, ease: 'power2.out' }, '-=0.2')
+              .fromTo(bizCorners, { opacity: 0, scale: 1.5 }, { opacity: 1, scale: 1, duration: 0.3, stagger: 0.05 }, '-=0.2')
+              .fromTo(bizTexts, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, stagger: 0.1, ease: 'back.out(1.2)' }, '-=0.1')
+              .fromTo(bizAction, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3 }, '-=0.2');
+        }
+
+        function closeBizModal() {
+            if (!bizModal || !bizContent) return;
+            const tl = gsap.timeline({ onComplete: () => gsap.set(bizModal, { pointerEvents: 'none' }) });
+            tl.to(bizContent, { scaleY: 0.02, opacity: 0, duration: 0.25, ease: 'power3.in' })
+              .to(bizBackdrop, { opacity: 0, duration: 0.2 }, '-=0.1');
+        }
+
+        if (bizOpen) bizOpen.addEventListener('click', (e) => { e.preventDefault(); openBizModal(); });
+        if (bizClose) bizClose.addEventListener('click', () => closeBizModal());
+        if (bizBackdrop) bizBackdrop.addEventListener('click', () => closeBizModal());
+        window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeBizModal(); });
+
+        function viewportSize() {
+            const vv = window.visualViewport;
+            return vv ? { w: Math.round(vv.width), h: Math.round(vv.height) } : { w: window.innerWidth, h: window.innerHeight };
+        }
+        function resizeRenderer() {
+            const s = viewportSize();
+            camera.aspect = s.w / s.h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(s.w, s.h);
+        }
+        resizeRenderer();
+        window.addEventListener('resize', resizeRenderer);
+    </script>
+</body>
+</html>

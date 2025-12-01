@@ -25,10 +25,10 @@
 ### デモ
 
 #### SLAM部分
-![SLAMデモ](assets/image_1_slam.jpg)
+![SLAMデモ](www/img/image_1_slam.jpg)
 
 #### YOLO部分
-![YOLOデモ](assets/image_2_yolo.jpg)
+![YOLOデモ](www/img/image_2_yolo.jpg)
 
 ---
 

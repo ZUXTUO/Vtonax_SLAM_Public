@@ -25,10 +25,10 @@ This project is a visual SLAM and basic AR demonstration application for Android
 ### Demo
 
 #### SLAM Part
-![SLAM Demo](assets/image_1_slam.jpg)
+![SLAM Demo](www/img/image_1_slam.jpg)
 
 #### YOLO Part
-![YOLO Demo](assets/image_2_yolo.jpg)
+![YOLO Demo](www/img/image_2_yolo.jpg)
 
 ---
 
