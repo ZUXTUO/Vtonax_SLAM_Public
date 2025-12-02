@@ -26,13 +26,13 @@
 ### 效果展示
 
 #### SLAM 部分
-![SLAM效果图](www/img/image_1_slam.jpg)
+![SLAM效果图](docs/img/image_1_slam.jpg)
 
 #### YOLO 部分
-![YOLO效果图](www/img/image_2_yolo.jpg)
+![YOLO效果图](docs/img/image_2_yolo.jpg)
 
 #### 可视化小窗 部分
-![可视化小窗效果图](www/img/image_3_miniwin.jpg)
+![可视化小窗效果图](docs/img/image_3_miniwin.jpg)
 
 ---
 

@@ -26,13 +26,13 @@
 ### デモ
 
 #### SLAM部分
-![SLAMデモ](www/img/image_1_slam.jpg)
+![SLAMデモ](docs/img/image_1_slam.jpg)
 
 #### YOLO部分
-![YOLOデモ](www/img/image_2_yolo.jpg)
+![YOLOデモ](docs/img/image_2_yolo.jpg)
 
 #### 可視化小窓部分
-![可視化小窓デモ](www/img/image_3_miniwin.jpg)
+![可視化小窓デモ](docs/img/image_3_miniwin.jpg)
 
 ---
 
