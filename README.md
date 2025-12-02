@@ -11,6 +11,7 @@
 ---
 
 **[点击下载 v0.0.1 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)**
+**[点击下载 v0.0.2 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)**
 
 ---
 
@@ -29,6 +30,9 @@
 
 #### YOLO 部分
 ![YOLO效果图](www/img/image_2_yolo.jpg)
+
+#### 可视化小窗 部分
+![可视化小窗效果图](www/img/image_3_miniwin.jpg)
 
 ---
 

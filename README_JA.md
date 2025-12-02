@@ -11,6 +11,7 @@
 ---
 
 **[v0.0.1 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)**
+**[v0.0.2 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)**
 
 ---
 
@@ -29,6 +30,9 @@
 
 #### YOLO部分
 ![YOLOデモ](www/img/image_2_yolo.jpg)
+
+#### 可視化小窓部分
+![可視化小窓デモ](www/img/image_3_miniwin.jpg)
 
 ---
 

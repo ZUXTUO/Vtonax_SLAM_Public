@@ -11,6 +11,7 @@ This project is a visual SLAM and basic AR demonstration application for Android
 ---
 
 **[Download v0.0.1](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)**
+**[Download v0.0.2](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)**
 
 ---
 
@@ -29,6 +30,9 @@ This project is a visual SLAM and basic AR demonstration application for Android
 
 #### YOLO Part
 ![YOLO Demo](www/img/image_2_yolo.jpg)
+
+#### Visualization Window Part
+![Visualization Window Demo](www/img/image_3_miniwin.jpg)
 
 ---
 
