@@ -10,8 +10,8 @@
 
 ---
 
-**[v0.0.1 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)**
-**[v0.0.2 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)**
+**[v0.0.1 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br>
+**[v0.0.2 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br>
 
 ---
 

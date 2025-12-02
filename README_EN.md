@@ -10,8 +10,8 @@ This project is a visual SLAM and basic AR demonstration application for Android
 
 ---
 
-**[Download v0.0.1](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)**
-**[Download v0.0.2](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)**
+**[Download v0.0.1](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br>
+**[Download v0.0.2](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br>
 
 ---
 
