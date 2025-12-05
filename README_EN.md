@@ -38,7 +38,7 @@ This project is a visual SLAM and basic AR demonstration application for Android
 
 ### System Requirements
 
-- Android 5.0+, supporting ARMv7a or ARM64-v8a
+- Android 6.0+, supporting ARMv7a or ARM64-v8a
 - Camera permission and basic graphics/computing capabilities required
 - Recommended Snapdragon 835 or higher CPU, theoretically supports lower-end CPUs but not extensively tested
 - YOLO part requires Vulkan support, will automatically detect and enable this feature if available

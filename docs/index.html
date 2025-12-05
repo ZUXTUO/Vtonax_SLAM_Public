@@ -32,7 +32,7 @@
             overflow-x: hidden;
             scrollbar-width: none; 
             -ms-overflow-style: none;
-            height: 800vh;
+            height: 950vh;
         }
         body::-webkit-scrollbar { 
             display: none; 
@@ -153,6 +153,33 @@
                 linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
             background-size: 40px 40px;
             opacity: 0.3;
+        }
+
+        /* Hand Animation Styles */
+        .hand-joint {
+            fill: var(--bg-black);
+            stroke: var(--brand-green);
+            stroke-width: 2;
+        }
+        .hand-bone {
+            fill: none;
+            stroke: var(--brand-green);
+            stroke-width: 1.5;
+            opacity: 0.8;
+        }
+        .hand-palm {
+            fill: rgba(0, 255, 136, 0.05);
+            stroke: var(--brand-green);
+            stroke-width: 1;
+        }
+        .scan-overlay {
+            animation: hand-scan 3s linear infinite;
+            background: linear-gradient(to bottom, transparent 40%, rgba(0,255,136,0.2) 50%, transparent 60%);
+            background-size: 100% 200%;
+        }
+        @keyframes hand-scan {
+            0% { background-position: 0% 200%; }
+            100% { background-position: 0% -100%; }
         }
 
         /* Sci-Fi Modal Styles */
@@ -459,6 +486,116 @@
             </div>
         </div>
 
+        <div class="spatial-section" id="section-gesture">
+            <div class="spatial-content px-6 md:px-12">
+                <div class="flex flex-col md:flex-row items-center gap-8 md:gap-16 max-w-6xl w-full">
+                    <div class="w-full md:w-1/2 text-left">
+                        <div class="inline-block bg-purple-500/20 text-purple-400 px-2 py-1 text-[10px] md:text-xs font-bold mb-4 font-tech">HAND_TRACKING</div>
+                        <h3 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                            手势<br><span class="text-glow-green text-[#00ff88]">交互控制</span>
+                        </h3>
+                        <p class="text-lg md:text-xl text-gray-300 leading-relaxed font-light">
+                            打破虚实界限，双手即是控制器。
+                            <br><br>
+                            <ul class="space-y-3 text-gray-400 text-sm md:text-base">
+                                <li class="flex items-start"><span class="mt-1.5 w-1.5 h-1.5 bg-[#00ff88] rounded-full mr-3 flex-shrink-0"></span><span>全向实时检测，支持任意数量手势</span></li>
+                                <li class="flex items-start"><span class="mt-1.5 w-1.5 h-1.5 bg-[#00ff88] rounded-full mr-3 flex-shrink-0"></span><span>精准识别捏合、张开、握拳等姿态</span></li>
+                                <li class="flex items-start"><span class="mt-1.5 w-1.5 h-1.5 bg-[#00ff88] rounded-full mr-3 flex-shrink-0"></span><span>MR 级空间操作体验，实时绘制</span></li>
+                            </ul>
+                        </p>
+                        <div class="mt-8 flex gap-4">
+                             <button id="demo-pinch-btn" class="group px-4 py-2 border border-[#00ff88]/50 text-[#00ff88] font-tech text-[10px] md:text-xs rounded hover:bg-[#00ff88]/10 transition-all relative overflow-hidden">
+                                <span class="relative z-10">SIMULATE PINCH</span>
+                                <div class="absolute inset-0 bg-[#00ff88]/20 transform -translate-x-full group-hover:translate-x-0 transition-transform duration-300"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/2 flex justify-center">
+                        <div class="relative w-64 h-64 md:w-80 md:h-80 group cursor-pointer" id="gesture-demo-area">
+                            <div class="absolute inset-0 bg-purple-900/10 rounded-full blur-3xl opacity-40"></div>
+                            <div class="absolute inset-0 border border-[#00ff88]/20 rounded-xl overflow-hidden pointer-events-none">
+                                <div class="scan-overlay w-full h-full"></div>
+                            </div>
+                            
+                            <!-- Enhanced Tech Hand SVG -->
+                            <svg id="hand-svg" class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full h-full" viewBox="0 0 300 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <filter id="glow-filter" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="3" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+                                <g id="hand-group" transform="translate(150, 380)" filter="url(#glow-filter)">
+                                    <!-- Palm (Base) -->
+                                    <g id="hand-palm-group">
+                                        <path class="hand-palm" d="M-40 -120 L40 -120 L55 -50 L30 0 L-30 0 L-55 -60 Z" />
+                                        <circle class="hand-joint" cx="-40" cy="-120" r="4" />
+                                        <circle class="hand-joint" cx="0" cy="-120" r="4" />
+                                        <circle class="hand-joint" cx="40" cy="-120" r="4" />
+                                        <circle class="hand-joint" cx="-50" cy="-60" r="5" /> <!-- Thumb base -->
+                                    </g>
+
+                                    <!-- Pinky -->
+                                    <g id="hand-pinky-group" transform="translate(40, -120) rotate(10)">
+                                        <path class="hand-bone" d="M0 0 L5 -30 L8 -50" />
+                                        <circle class="hand-joint" cx="5" cy="-30" r="3" />
+                                        <circle class="hand-joint" cx="8" cy="-50" r="2.5" />
+                                    </g>
+
+                                    <!-- Ring -->
+                                    <g id="hand-ring-group" transform="translate(15, -120) rotate(3)">
+                                        <path class="hand-bone" d="M0 0 L2 -40 L4 -70" />
+                                        <circle class="hand-joint" cx="2" cy="-40" r="3" />
+                                        <circle class="hand-joint" cx="4" cy="-70" r="2.5" />
+                                    </g>
+
+                                    <!-- Middle -->
+                                    <g id="hand-middle-group" transform="translate(-15, -120) rotate(-2)">
+                                        <path class="hand-bone" d="M0 0 L-2 -45 L-3 -80" />
+                                        <circle class="hand-joint" cx="-2" cy="-45" r="3" />
+                                        <circle class="hand-joint" cx="-3" cy="-80" r="2.5" />
+                                    </g>
+
+                                    <!-- Index Group (Animated) -->
+                                    <g id="hand-index-group" transform="translate(-40, -120)">
+                                        <!-- Proximal Phalanx -->
+                                        <path class="hand-bone" d="M0 0 L-10 -40" stroke-width="3"/>
+                                        <circle class="hand-joint" cx="-10" cy="-40" r="3.5" />
+                                        
+                                        <!-- Distal Group -->
+                                        <g id="hand-index-distal" transform="translate(-10, -40)">
+                                            <path class="hand-bone" d="M0 0 L-8 -35" stroke-width="3"/>
+                                            <circle class="hand-joint" cx="-8" cy="-35" r="3" />
+                                        </g>
+                                    </g>
+
+                                    <!-- Thumb Group (Animated) -->
+                                    <g id="hand-thumb-group" transform="translate(-50, -60) rotate(-30)">
+                                        <!-- Proximal -->
+                                        <path class="hand-bone" d="M0 0 L-25 -25" stroke-width="3"/>
+                                        <circle class="hand-joint" cx="-25" cy="-25" r="3.5" />
+                                        
+                                        <!-- Distal -->
+                                        <g id="hand-thumb-distal" transform="translate(-25, -25)">
+                                            <path class="hand-bone" d="M0 0 L-20 -20" stroke-width="3"/>
+                                            <circle class="hand-joint" cx="-20" cy="-20" r="3" />
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg>
+                            
+                            <!-- The Cube (CSS 3D) -->
+                             <div id="demo-cube" class="absolute top-[30%] left-[35%] transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 border border-[#00ff88] shadow-[0_0_15px_#00ff88] transition-all duration-300 flex items-center justify-center bg-[#00ff88]/10 backdrop-blur-sm opacity-50 scale-75">
+                                <div class="w-1 h-1 bg-[#00ff88] rounded-full"></div>
+                             </div>
+                             
+                             <div class="absolute bottom-4 left-0 right-0 text-center text-[10px] text-gray-500 font-tech uppercase tracking-widest">System Ready • Click to Interact</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="spatial-section" id="section-footer">
             <div class="spatial-content px-4">
                 <div class="text-center w-full">
@@ -642,10 +779,11 @@
             { id: "#section-tech", z: 3000 },
             { id: "#section-media", z: 4500 },
             { id: "#section-ai", z: 6000 },
-            { id: "#section-footer", z: 7500 }
+            { id: "#section-gesture", z: 7500 },
+            { id: "#section-footer", z: 9000 }
         ];
 
-        const totalDepth = 8000; 
+        const totalDepth = 9500; 
 
         function applyProgress(progress) {
             targetCameraZ = progress * totalDepth;
@@ -923,6 +1061,141 @@
             const vv = window.visualViewport;
             return vv ? { w: Math.round(vv.width), h: Math.round(vv.height) } : { w: window.innerWidth, h: window.innerHeight };
         }
+        // Gesture Demo Logic
+        const gestureBtn = document.getElementById('demo-pinch-btn');
+        const gestureArea = document.getElementById('gesture-demo-area');
+        const thumbGroup = document.getElementById('hand-thumb-group');
+        const indexGroup = document.getElementById('hand-index-group');
+        const thumbDistal = document.getElementById('hand-thumb-distal');
+        const indexDistal = document.getElementById('hand-index-distal');
+        const cube = document.getElementById('demo-cube');
+        
+        let isPinched = false;
+        
+        const middleFinger = document.getElementById('hand-middle-group');
+        const ringFinger = document.getElementById('hand-ring-group');
+        const pinkyFinger = document.getElementById('hand-pinky-group');
+        function getT(el){ return el ? (el.getAttribute('transform') || '') : '' }
+        function parseT(t){
+            const m = t.match(/translate\(([-\d.]+),\s*([-\d.]+)\)/);
+            const r = t.match(/rotate\(([-\d.]+)\)/);
+            return { tx: m ? parseFloat(m[1]) : 0, ty: m ? parseFloat(m[2]) : 0, rot: r ? parseFloat(r[1]) : undefined };
+        }
+        function composeT(tx, ty, rot){
+            const base = `translate(${tx}, ${ty})`;
+            return rot === undefined ? base : `${base} rotate(${rot})`;
+        }
+        const initialTransforms = {
+            indexGroup: getT(indexGroup),
+            indexDistal: getT(indexDistal),
+            thumbGroup: getT(thumbGroup),
+            thumbDistal: getT(thumbDistal),
+            middleFinger: getT(middleFinger),
+            ringFinger: getT(ringFinger),
+            pinkyFinger: getT(pinkyFinger)
+        };
+
+        function togglePinch() {
+            isPinched = !isPinched;
+            
+            if (isPinched) {
+                // More realistic pinch animation with better joint movement
+                // Index Finger: Animate proximal and distal phalanges separately for natural curl
+                const idx = parseT(initialTransforms.indexGroup);
+                gsap.to(indexGroup, { attr: { transform: composeT(idx.tx + 2, idx.ty + 8, -25) }, duration: 0.5, ease: "elastic.out(1, 0.7)" });
+                
+                // Animate index finger distal phalanx with a slight delay for more natural movement
+                const idxD = parseT(initialTransforms.indexDistal);
+                gsap.to(indexDistal, { attr: { transform: composeT(idxD.tx, idxD.ty, -45) }, duration: 0.45, ease: "back.out(1.4)", delay: 0.05 });
+
+                // Thumb: Animate with a natural curl motion
+                const th = parseT(initialTransforms.thumbGroup);
+                gsap.to(thumbGroup, { attr: { transform: composeT(th.tx + 4, th.ty - 5, 6) }, duration: 0.5, ease: "elastic.out(1, 0.7)" });
+                
+                // Animate thumb distal phalanx
+                const thD = parseT(initialTransforms.thumbDistal);
+                gsap.to(thumbDistal, { attr: { transform: composeT(thD.tx, thD.ty, 30) }, duration: 0.45, ease: "back.out(1.4)", delay: 0.05 });
+
+                // Enhance other fingers slightly for realism
+                if (middleFinger) {
+                    const m = parseT(initialTransforms.middleFinger);
+                    gsap.to(middleFinger, { attr: { transform: composeT(m.tx, m.ty, -2) }, duration: 0.3, ease: "power2.out" });
+                }
+                if (ringFinger) {
+                    const r = parseT(initialTransforms.ringFinger);
+                    gsap.to(ringFinger, { attr: { transform: composeT(r.tx, r.ty, -3) }, duration: 0.3, ease: "power2.out" });
+                }
+                if (pinkyFinger) {
+                    const p = parseT(initialTransforms.pinkyFinger);
+                    gsap.to(pinkyFinger, { attr: { transform: composeT(p.tx, p.ty, -5) }, duration: 0.3, ease: "power2.out" });
+                }
+
+                // Cube Reaction with enhanced effect
+                gsap.to(cube, { 
+                    scale: 1.15, 
+                    opacity: 1,
+                    boxShadow: "0 0 45px #00ff88, 0 0 25px #ffffff",
+                    backgroundColor: "rgba(0, 255, 136, 0.7)",
+                    duration: 0.4,
+                    ease: "elastic.out(1, 0.8)"
+                });
+                
+                // Add a subtle pulse effect to the hand
+                const handGroup = document.getElementById('hand-group');
+                if (handGroup) {
+                    gsap.to(handGroup, {
+                        scale: 1.03,
+                        duration: 0.2,
+                        yoyo: true,
+                        repeat: 1,
+                        ease: "power1.inOut"
+                    });
+                }
+                
+                if (gestureBtn) gestureBtn.querySelector('span').textContent = "RELEASE";
+            } else {
+                gsap.to(thumbGroup, { attr: { transform: initialTransforms.thumbGroup }, duration: 0.6, ease: "elastic.out(1, 0.5)" });
+                gsap.to(indexGroup, { attr: { transform: initialTransforms.indexGroup }, duration: 0.6, ease: "elastic.out(1, 0.5)", delay: 0.05 });
+                gsap.to(thumbDistal, { attr: { transform: initialTransforms.thumbDistal }, duration: 0.5, ease: "back.out(1.7)", delay: 0.35 });
+                gsap.to(indexDistal, { attr: { transform: initialTransforms.indexDistal }, duration: 0.5, ease: "back.out(1.7)", delay: 0.4 });
+                if (middleFinger) gsap.to(middleFinger, { attr: { transform: initialTransforms.middleFinger }, duration: 0.4, ease: "power2.out" });
+                if (ringFinger) gsap.to(ringFinger, { attr: { transform: initialTransforms.ringFinger }, duration: 0.4, ease: "power2.out" });
+                if (pinkyFinger) gsap.to(pinkyFinger, { attr: { transform: initialTransforms.pinkyFinger }, duration: 0.4, ease: "power2.out" });
+                
+                // Cube Reset with smooth transition
+                gsap.to(cube, { 
+                    scale: 0.75, 
+                    opacity: 0.5,
+                    boxShadow: "0 0 15px #00ff88",
+                    backgroundColor: "rgba(0, 255, 136, 0.1)",
+                    duration: 0.6,
+                    ease: "elastic.out(1, 0.5)"
+                });
+                
+                // Reset hand pulse effect
+                const handGroup = document.getElementById('hand-group');
+                if (handGroup) {
+                    gsap.to(handGroup, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: "power1.out"
+                    });
+                }
+                
+                if (gestureBtn) gestureBtn.querySelector('span').textContent = "SIMULATE PINCH";
+            }
+        }
+
+        if (gestureBtn) gestureBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            togglePinch();
+        });
+        
+        if (gestureArea) gestureArea.addEventListener('click', (e) => {
+            e.preventDefault();
+            togglePinch();
+        });
+
         function resizeRenderer() {
             const s = viewportSize();
             camera.aspect = s.w / s.h;
