@@ -10,8 +10,9 @@ This project is a visual SLAM and basic AR demonstration application for Android
 
 ---
 
-**[Download v0.0.1](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br>
-**[Download v0.0.2](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br>
+**[Download v0.0.1](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br><br>
+**[Download v0.0.2](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br><br>
+**[Download v0.0.3](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.3)** <br><br>
 
 ---
 
@@ -22,6 +23,7 @@ This project is a visual SLAM and basic AR demonstration application for Android
 - Point cloud visualization and plane detection
 - AR object placement and interactive rendering
 - Object detection (optional), running in parallel with SLAM
+- Gesture recognition (optional), running in parallel with SLAM
 
 ### Demo
 
@@ -42,6 +44,7 @@ This project is a visual SLAM and basic AR demonstration application for Android
 - Camera permission and basic graphics/computing capabilities required
 - Recommended Snapdragon 835 or higher CPU, theoretically supports lower-end CPUs but not extensively tested
 - YOLO part requires Vulkan support, will automatically detect and enable this feature if available
+- Gesture recognition cannot be enabled at the same time as YOLO part
 
 ---
 

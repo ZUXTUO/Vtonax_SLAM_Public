@@ -10,8 +10,9 @@
 
 ---
 
-**[v0.0.1 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br>
-**[v0.0.2 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br>
+**[v0.0.1 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br><br>
+**[v0.0.2 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br><br>
+**[v0.0.3 版をダウンロード](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.3)** <br><br>
 
 ---
 
@@ -22,6 +23,7 @@
 - 点群可視化と平面検出
 - ARオブジェクトの配置とインタラクティブレンダリング
 - 物体検出（オプション）、SLAMと並行実行
+- ジェスチャー認識（オプション）、SLAMと並行実行
 
 ### デモ
 
@@ -42,6 +44,7 @@
 - カメラ権限と基本的なグラフィックス/計算能力が必要
 - Snapdragon 835以上のCPUを推奨、理論的にはより低スペックのCPUもサポートしますが、十分なテストは行っていません
 - YOLO部分はVulkanサポートが必要で、自動的に検出し、利用可能な場合にこの機能を有効にします
+- ジェスチャー認識は、YOLOと並行して実行することはできません。
 
 ---
 

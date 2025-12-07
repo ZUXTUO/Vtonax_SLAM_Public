@@ -10,8 +10,9 @@
 
 ---
 
-**[点击下载 v0.0.1 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br>
-**[点击下载 v0.0.2 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br>
+**[点击下载 v0.0.1 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.1)** <br><br>
+**[点击下载 v0.0.2 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.2)** <br><br>
+**[点击下载 v0.0.3 版本](https://github.com/ZUXTUO/Vtonax_SLAM_Public/releases/tag/v0.0.3)** <br><br>
 
 ---
 
@@ -22,6 +23,7 @@
 - 点云可视化与平面检测
 - AR 对象放置与交互渲染
 - 目标检测（可选），与 SLAM 并行
+- 手势识别（可选），与 SLAM 并行
 
 ### 效果展示
 
@@ -42,6 +44,7 @@
 - 需要摄像头权限与基本的图形/计算能力
 - 推荐使用骁龙835及以上的CPU，理论上支持更低级CPU但没做太多测试
 - Yolo部分需要Vulkan支持，会自动检测本机是否支持开启此功能
+- 手势识别不可与Yolo同时开启
 
 ---
 
